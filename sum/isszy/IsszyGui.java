@@ -3,6 +3,7 @@ package sum.isszy;
 import sum.component.*;
 import sum.event.*;
 import java.io.File;
+import java.io.IOException;
 import javax.swing.JSplitPane;
 import javax.swing.JFrame;
 import javax.swing.JButton;
@@ -77,7 +78,14 @@ public class IsszyGui extends JFrame implements FileListListener, DirPanelListen
 	if(files.length == 1)
 	{
 	    selectedfiles = files;
-	    image.setImage(files[0]);
+            try
+		{
+		    image.setImage(files[0]);
+		}
+	    catch(IOException v)
+		{
+		    //insert message box here
+		}
 	}
     }
     //end FileListListener implemented functions

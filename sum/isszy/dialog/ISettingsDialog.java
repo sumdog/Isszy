@@ -1,6 +1,6 @@
 package sum.isszy.dialog;
 
-import java.awt.Frame;
+import javax.swing.JFrame;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -16,7 +16,7 @@ public class ISettingsDialog extends JDialog
 {
     public ISettingsDialog()
     {
-	super(new Frame(),"Isszy Preferences");
+	super(new JFrame(),"Isszy Preferences",true);
 	construct();
     }
 

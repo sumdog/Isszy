@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 
-public class IsszyGui extends JFrame implements FileListListener
+public class IsszyGui extends JFrame implements FileListListener, DirPanelListener
 {
     //source and destenation image sleectors
     private File lister, sorter;
@@ -26,6 +26,9 @@ public class IsszyGui extends JFrame implements FileListListener
         private JPanel bottom_right = new JPanel(); 
           private JButton b_mkdir = new JButton("New Folder");
           private JButton b_trash = new JButton("Trash");
+
+    //storage variables
+    protected File[] selectedfiles;
 
     public IsszyGui(File lister, File sorter)
     {
@@ -50,11 +53,12 @@ public class IsszyGui extends JFrame implements FileListListener
 	bottom_right.add(b_trash);
 
 	//setup SplitPanes
-	//sp_right = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,image,west);
 	sp_left = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,sfl_list,image);
+	sp_left.setDividerLocation(sp_left.getMinimumDividerLocation());
 
 	//add listeners
 	sfl_list.addFileListListener(this);
+	dp_dirlist.addDirPanelListener(this);
 
 	//add everything to Frame
 	getContentPane().setLayout(new BorderLayout());
@@ -70,10 +74,20 @@ public class IsszyGui extends JFrame implements FileListListener
     {}
     public void filesSelected(File[] files)
     {
-	image.setImage(files[0]);
+	if(files.length == 1)
+	{
+	    selectedfiles = files;
+	    image.setImage(files[0]);
+	}
     }
     //end FileListListener implemented functions
 
+    //start DirPanelListener implemented function
+    public void directorySelected(File dir)
+    {
+	System.out.println(dir);
+    }
+    //end DirPanelListener implemented function
 }
 
 

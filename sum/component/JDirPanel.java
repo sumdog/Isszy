@@ -97,7 +97,7 @@ public class JDirPanel extends JScrollPane
     public Dimension getMinimumSize()
     { return getPreferredSize(); }
     public Dimension getPreferredSize()
-    { return new Dimension(c_dirs.width,super.getPreferredSize().height); }
+    { return new Dimension(c_dirs.width ,super.getPreferredSize().height); }
 
 
 }

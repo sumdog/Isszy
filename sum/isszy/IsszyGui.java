@@ -6,6 +6,8 @@ import sum.isszy.dialog.ISettingsDialog;
 import sum.isszy.dialog.IOverwriteDialog;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.JSplitPane;
@@ -14,10 +16,12 @@ import javax.swing.JFrame;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import java.awt.Toolkit;
 
 public class IsszyGui extends JFrame implements FileListListener, DirPanelListener, ActionListener
 {
@@ -43,6 +47,8 @@ public class IsszyGui extends JFrame implements FileListListener, DirPanelListen
     private JMenu m_help = new JMenu("Help");
     private JMenuItem mi_about = new JMenuItem("About");
 
+    //position/size vars
+    int xcor, ycor, pwidth, pheight; 
 
     //storage variables
     protected File[] selectedfiles;
@@ -57,7 +63,7 @@ public class IsszyGui extends JFrame implements FileListListener, DirPanelListen
     private void construct()
     {
 	//construct menubars
-        m_file.add(mi_exit);
+    m_file.add(mi_exit);
 	m_options.add(mi_preferences);
 	m_help.add(mi_about);
 	menu.add(m_file);
@@ -86,6 +92,7 @@ public class IsszyGui extends JFrame implements FileListListener, DirPanelListen
 	dp_dirlist.addDirPanelListener(this);
 	b_mkdir.addActionListener(this);
 	b_trash.addActionListener(this);
+	mi_exit.addActionListener(this);
 
 	//add everything to Frame
 	getContentPane().setLayout(new BorderLayout());
@@ -93,7 +100,58 @@ public class IsszyGui extends JFrame implements FileListListener, DirPanelListen
 	getContentPane().add(east, BorderLayout.EAST);
 	getContentPane().add(menu, BorderLayout.NORTH);
 
+    //set our size
+    this.setSize(pwidth,pheight);
+    
+    //set our title
+    this.setTitle("Isszy");
+    
+    //get some information about our screen
+   		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		Dimension frameSize = this.getSize();
+    //if x/y cors haven't been established, 
+    //or if they've become invalid, center the window
+    if(  xcor < 0 || ycor < 0 )
+    {
+		 //Center the window 
+
+		if (frameSize.height > screenSize.height) {
+		frameSize.height = screenSize.height;
+		}
+		if (frameSize.width > screenSize.width) {
+		frameSize.width = screenSize.width;
+		}
+		this.setLocation((screenSize.width - frameSize.width) / 2,
+		(screenSize.height - frameSize.height) / 2);
+		//end centering window code
     }
+    else
+    {
+    	this.setLocation(xcor,ycor);
+    }
+    
+    //handle window closign 
+    this.addWindowListener(new WindowAdapter()
+      {
+      	public void windowClosing(WindowEvent e)
+      	{
+      		//be sure to save window size/position if user wants them
+      		if(IsszyPrefs.getSaveSettings())
+      		{
+      			//write all position/size info
+      			IsszyPrefs.setHeight(e.getWindow().getHeight());
+      			IsszyPrefs.setWidth(e.getWindow().getWidth());
+      			IsszyPrefs.setXPosition(e.getWindow().getLocation().x);
+      			IsszyPrefs.setYPosition(e.getWindow().getLocation().y);
+      			//exit program
+      			System.exit(0);
+      		}
+      	}//end windowClosing()
+      }//end anonymous innerclass
+    );//end addWindowListner()
+    
+    
+    }//end construct()
 
     //begin FileListListener implemented functions
     public void dirEmpty()
@@ -198,11 +256,20 @@ public class IsszyGui extends JFrame implements FileListListener, DirPanelListen
 	else if(e.getSource() == b_trash)
 	    {
 	    }
+	else if(e.getSource() == mi_exit)
+	    {
+	    	//run our windowClosing() function in the window adapter
+	    	this.dispatchEvent(new WindowEvent(this,WindowEvent.WINDOW_CLOSING));
+	    }
     }
 
     private void readPrefs()
     {
 	//establish preferences
+	xcor = IsszyPrefs.getXPosition();
+	ycor = IsszyPrefs.getYPosition();
+	pwidth = IsszyPrefs.getWidth();
+	pheight = IsszyPrefs.getHeight();
 	image.setZoom(IsszyPrefs.getZoomImage());
 	image.setCenter(IsszyPrefs.getCenterImage());
 	lister = new File(IsszyPrefs.getInitialDirectory());

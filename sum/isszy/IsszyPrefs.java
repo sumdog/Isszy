@@ -89,4 +89,28 @@ public class IsszyPrefs
 
     public static int getSlideTime()
     { return prefs.getInt("SLIDETIME", 1); }
+    
+    public static int getHeight()
+    { return prefs.getInt("HEIGHT",480);}
+    
+    public static int getWidth()
+    { return prefs.getInt("WIDTH",640); }
+    
+    public static void setHeight(int x)
+    { prefs.putInt("HEIGHT",x); }
+    
+    public static void setWidth(int x)
+    { prefs.putInt("WIDTH",x); }
+    
+     public static int getXPosition()
+    { return prefs.getInt("XPOSITION",-1);}
+    
+    public static int getYPosition()
+    { return prefs.getInt("YPOSITION",-1); }
+    
+    public static void setXPosition(int x)
+    { prefs.putInt("XPOSITION",x); }
+    
+    public static void setYPosition(int x)
+    { prefs.putInt("YPOSITION",x); }
 }

@@ -22,7 +22,6 @@ public class Isszy
 	
 
 	IsszyGui main = new IsszyGui();
-	main.setSize(640,480);
 	main.setVisible(true);
     }
 }

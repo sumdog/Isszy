@@ -26,6 +26,11 @@
   <target name="clean">
     <delete dir="${build}" />
     <delete dir="${doc}" />
+    <delete file="./Isszy.jar" />
+  </target>
+
+  <target name="jar" depends="compile">
+    <jar destfile="./Isszy.jar" basedir="${build}" manifest="./manifest.txt" />
   </target>
 
   <target name="doc" depends="init">

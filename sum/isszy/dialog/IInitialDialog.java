@@ -12,6 +12,9 @@ import java.awt.GridLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
 import javax.swing.JFileChooser;
 import java.io.File;
 import java.io.IOException;
@@ -79,6 +82,14 @@ public class IInitialDialog extends JDialog implements ActionListener
 	b_from.addActionListener(this);
 	b_ok.addActionListener(this);
 	b_exit.addActionListener(this);
+	
+	//exit the program if the user closes this dialog
+	this.addWindowListener(new WindowAdapter() 
+	  {
+	  	public void windowClosing(WindowEvent e)
+	  	{ System.exit(2); }
+	  }
+	 );
 
 	//a message to explain to user what's going on
 	JOptionPane.showMessageDialog(new JFrame(),"Welcome to Isszy Image Sorter.\nSince this is your first time using this application,\nyou'll need to setup an initial directory of photos\nyou wish to sort and a directory to sort those \nphotos into.", "Welcome to Isszy", JOptionPane.PLAIN_MESSAGE);

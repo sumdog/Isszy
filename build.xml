@@ -3,22 +3,27 @@
   <!--globals-->
   <property name="src" value="." />
   <property name="build" value="./build" />
-  
+  <property name="doc" value="./doc" /> 
 
   <!--create build directory-->
   <target name="init">
     <tstamp/>
     <mkdir dir="${build}" />
+    <mkdir dir="${doc}"  />
   </target>
 
   <!--compile all source files-->
   <target name="compile" depends="init">
-    <javac srcdir="${src}" destdir="${build}"/>
+    <javac srcdir="${src}" destdir="${build}" debug="on"/>
   </target>
 
   <!--clean up compiled class files-->
   <target name="clean">
     <delete dir="${build}" />
+  </target>
+
+  <target name="doc" depends="init">
+    <javadoc sourcepath="${src}" destdir="${doc}" packagenames="sum.*" />
   </target>
 
 </project>

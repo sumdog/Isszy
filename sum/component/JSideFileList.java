@@ -19,8 +19,10 @@ import java.awt.GridBagConstraints;
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -29,7 +31,7 @@ import java.util.Collections;
 
 import sum.event.FileListListener;
 
-public class JSideFileList extends JComponent implements FileFilter, MouseListener, ActionListener
+public class JSideFileList extends JComponent implements FileFilter, ActionListener, ListSelectionListener, MouseListener
 {
   //The top componets for controls
   private Container con_top = new Container();
@@ -124,9 +126,9 @@ public class JSideFileList extends JComponent implements FileFilter, MouseListen
 
            //add listeners
            jl_dirs.addMouseListener(this);
-           jl_files.addMouseListener(this);
-           b_parent.addMouseListener(this);
-           b_refresh.addMouseListener(this);
+           jl_files.addListSelectionListener(this);
+           b_parent.addActionListener(this);
+           b_refresh.addActionListener(this);
            jcb_mounts.addActionListener(this);
 
        //adds the top piece to the component
@@ -198,46 +200,18 @@ public class JSideFileList extends JComponent implements FileFilter, MouseListen
         return false;
    }//end accept()
 
-
 //begin mouse listener interface
    public void mouseClicked(MouseEvent e)
    {
-       //refresh button
-       if(e.getSource() == b_refresh)
-       {
-          scanDir(current);
-          jsp_split.repaint();
-       }
-       //parent directory button
-       else if(e.getSource() == b_parent && b_parent.isEnabled())
-       {
-          current = current.getParentFile();
-          scanDir(current);
-          jl_dirs.clearSelection();
-          jl_files.clearSelection();
-          jsp_split.repaint();
-       }
-
        //change the directory and rescan
-       else if(e.getSource() == jl_dirs && jl_dirs.getSelectedValue() != null )
+       if(e.getSource() == jl_dirs && jl_dirs.getSelectedValue() != null )
        {
           current = new File(current, (String) jl_dirs.getSelectedValue()) ;
           scanDir(current);
           dispatchDirEvent(current);
           jsp_split.repaint();
        }
-       //file is selected
-       else if(e.getSource() == jl_files && jl_files.getSelectedValue() != null)//the user selected a file
-       {
-           //dispatchFileEvent(new File(current,(String) jl_files.getSelectedValue()));
-           String[] temps = (String[]) jl_files.getSelectedValues();
-	   File[] tempf = new File[temps.length];
-           for(int j=0; j < temps.length; j++)
-	   {
-	       tempf[j] = new File(current, temps[j]);
-	   }
-	   dispatchFileEvent(tempf);
-       }
+
    }
    public void mouseExited(MouseEvent e)
    {}
@@ -249,6 +223,23 @@ public class JSideFileList extends JComponent implements FileFilter, MouseListen
    {
    }
 //end mouse listener interface
+
+
+//begin ListSelectionListener interface
+   public void valueChanged(ListSelectionEvent e)
+   {
+       if(e.getSource() == jl_files)
+       {
+           Object[] temps = jl_files.getSelectedValues();
+	   File[] tempf = new File[temps.length];
+           for(int j=0; j < temps.length; j++)
+	   {
+	       tempf[j] = new File(current, (String) temps[j]);
+	   }
+	   dispatchFileEvent(tempf);
+       }
+   }
+//end list listener interface
 //begin action listener interface
    public void actionPerformed(ActionEvent e)
    {
@@ -259,6 +250,21 @@ public class JSideFileList extends JComponent implements FileFilter, MouseListen
            current = new File( ((JComboBox) e.getSource()).getSelectedItem().toString()   );
            scanDir(current);
            jsp_split.repaint();
+       }
+       //refresh button
+       else if(e.getSource() == b_refresh)
+       {
+          scanDir(current);
+          jsp_split.repaint();
+       }
+       //parent directory button
+       else if(e.getSource() == b_parent)
+       {
+          current = current.getParentFile();
+          scanDir(current);
+          jl_dirs.clearSelection();
+          jl_files.clearSelection();
+          jsp_split.repaint();
        }
    }
 //end action listener interface

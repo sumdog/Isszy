@@ -56,12 +56,11 @@ public class JDirPanel extends JScrollPane
           {
 	      //tells the component the maximum width they are alloted via the DirSizer interface implemented by
 	      //the JDirPanel
-              ((DirSizer)((JScrollPane)e.getSource()).getViewport().getView()).setDSize(((Container)e.getSource()).getWidth());
+              ((DirSizer)((JScrollPane)e.getSource()).getViewport().getView()).setDSize(((JScrollPane)e.getSource()).getWidth());
 	      //refreshed the viewport
 	      ((JScrollPane)e.getSource()).setViewportView( ((JScrollPane)e.getSource()).getViewport().getView()  );
           }
         });
-
     }
 
     /**
@@ -93,6 +92,14 @@ public class JDirPanel extends JScrollPane
     public void addDirPanelListener(DirPanelListener l)
     { c_dirs.listener = l; }
 
+    public Dimension getMaximumSize()
+    { return getPreferredSize(); }
+    public Dimension getMinimumSize()
+    { return getPreferredSize(); }
+    public Dimension getPreferredSize()
+    { return new Dimension(c_dirs.width,super.getPreferredSize().height); }
+
+
 }
 
 class JDir extends Container implements DirSizer, ActionListener
@@ -105,7 +112,7 @@ class JDir extends Container implements DirSizer, ActionListener
     /**
      *the width of the children buttons.
      */
-    private int width;
+    int width;
 
     /**
      *listener for panel.
@@ -152,7 +159,10 @@ class JDir extends Container implements DirSizer, ActionListener
  
     //begin implemented functions
     public void setDSize(int width)
-    { this.width = width;  }
+    {
+	if(width > this.width) 
+	  this.width = width;  
+    }
 
     public int getDSize()
     { return width;  }
@@ -195,6 +205,7 @@ class JDirButton extends JButton
         file = a;
         size = s;
         addActionListener(l);
+	size.setDSize(super.getPreferredSize().width);
     }
 
     /**

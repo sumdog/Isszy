@@ -15,25 +15,78 @@
 package sum.isszy;
 
 import java.util.prefs.Preferences;
-
+import java.io.File;
+import java.io.IOException;
 
 public class IsszyPrefs
 {
 
     private static Preferences prefs = Preferences.userNodeForPackage(Isszy.class);
 
-    /**
-     *creates a prefrence object set with default values.<BR>
-     */
-    public IsszyPrefs()
-    {
-	//initalize all public vars
+    public static boolean getZoomImage()
+    { return prefs.getBoolean("ZOOM",true); }
+
+    public static boolean getCenterImage()
+    { return prefs.getBoolean("CENTER",true); }
+
+    public static boolean getSlideShow()
+    { return prefs.getBoolean("SLIDE", true); }
+
+    public static boolean getSaveSettings()
+    { return prefs.getBoolean("SAVE", false); }
+
+    public static boolean getPromptOverwrite()
+    { return prefs.getBoolean("OVERWRITE",true); }
+
+    public static String getInitialDirectory()
+    { return prefs.get("IDIR","./"); }
+
+    public static String getSortDirectory()
+    { return prefs.get("SDIR","./"); }
+
+    public static boolean getFirstStart()
+    { return prefs.getBoolean("FIRST",true); }
+
+    public static void setFirstStart(boolean b)
+    { prefs.putBoolean("FIRST",b); }
+
+    public static void setZoomImage(boolean b)
+    { prefs.putBoolean("ZOOM",b); }
+
+    public static void setCenterImage(boolean b)
+    { prefs.putBoolean("CENTER",b); }
+
+    public static void setSlideShow(boolean b)
+    { prefs.putBoolean("SLIDE",b); }
+
+    public static void setSaveSettings(boolean b)
+    { prefs.putBoolean("SAVE",b); }
+
+    public static void setPromptOverwrite(boolean b)
+    { prefs.putBoolean("OVERWRITE",b); }
+
+    public static void setInitialDirectory(String s) throws IOException
+    { 
+	if( (new File(s).isDirectory()) )
+	    { prefs.put("IDIR",s); }
+	else
+	    { throw new IOException("Invalid Directory"); }
     }
 
-    /**
-     *writes all changed prefrences. <BR>
-     */
-    public void writePrefs()
-    {
+    public static void setSortDirectory(String s) throws IOException
+    { 
+	if( (new File(s).isDirectory()) )
+	    { prefs.put("SDIR",s); }
+	else
+	    {throw new IOException("Invalid Directory"); }
     }
+
+    public static void setSlideTime(String s) throws NumberFormatException
+    { prefs.putInt("SLIDETIME", Integer.parseInt(s)); }
+
+    public static void setSlideTime(int i)
+    { prefs.putInt("SLIDETIME",i); }
+
+    public static int getSlideTime()
+    { return prefs.getInt("SLIDETIME", 1); }
 }

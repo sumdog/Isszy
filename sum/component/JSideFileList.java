@@ -56,6 +56,9 @@ public class JSideFileList extends JComponent implements FileFilter, ActionListe
      private JScrollPane jsp_files= new JScrollPane(jl_files);
   private JSplitPane jsp_split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,jsp_dirs,jsp_files);
 
+    //keeps track of list position between refreshes
+    private int position_sensor;
+
   /**
     *constructs a file list set to the current directory.
     */
@@ -87,11 +90,34 @@ public class JSideFileList extends JComponent implements FileFilter, ActionListe
     construct();
   }
 
+    /**
+     *sets the current directory.
+     *@param f current directory to set.
+     */
+    public void setDir(File f)
+    {
+	current = f;
+	scanDir(f);
+    }
+
   /**
-   *refreshes the current list of files.<BR>
+   *refreshes the current list of files after a file has been moved.<BR>
    */
   public void refreshFiles()
-  { scanDir(current); }
+  { 
+      scanDir(current);
+      if(vfiles.size() == 0)
+	  { dispatchDirEmptyEvent(); }
+      else if(position_sensor >= vfiles.size())
+	  { 
+	      jl_files.setSelectedIndex( jl_files.getLastVisibleIndex() ); 
+	  }
+      else
+	  { 
+	      jl_files.setSelectedIndex( position_sensor ); 
+	  }
+      jsp_split.repaint();
+  }
 
   /**
     *aranges the components and layouts.<BR>
@@ -228,7 +254,7 @@ public class JSideFileList extends JComponent implements FileFilter, ActionListe
 //begin ListSelectionListener interface
    public void valueChanged(ListSelectionEvent e)
    {
-       if(e.getSource() == jl_files)
+       if(e.getSource() == jl_files && (e.getValueIsAdjusting() ==false))
        {
            Object[] temps = jl_files.getSelectedValues();
 	   File[] tempf = new File[temps.length];
@@ -236,6 +262,8 @@ public class JSideFileList extends JComponent implements FileFilter, ActionListe
 	   {
 	       tempf[j] = new File(current, (String) temps[j]);
 	   }
+	   if( ( (JList) e.getSource()).getSelectedIndex() != -1)
+	       { position_sensor = ((JList) e.getSource()).getSelectedIndex(); }
 	   dispatchFileEvent(tempf);
        }
    }
@@ -296,6 +324,11 @@ public class JSideFileList extends JComponent implements FileFilter, ActionListe
       if(listener != null)
       { listener.mountSelected(s); }
    }
+    protected void dispatchDirEmptyEvent()
+    {
+	if(listener != null)
+	    { listener.dirEmpty(); }
+    }
 
 }//end class
 

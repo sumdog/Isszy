@@ -44,6 +44,19 @@ public class JImagePane extends JScrollPane
         canvas.setImage(f);
 	setViewportView(canvas);
     }
+
+    /**
+     *sets multiple images to be displayed as a slide show.<br>
+     *@param f file objects containing the abstract pathname for the images
+     *@param i the interval at which the slides will be displayed
+     *@exception thrown if there was a problem processing the image
+     */
+    public void setImage(File[] f, int i) throws IOException
+    {
+	canvas.setImage(f,i);
+	setViewportView(canvas);
+    }
+
     /**
      *determines if image is centered.<BR>
      *@param b determines if you want to center the image.
@@ -71,17 +84,24 @@ public class JImagePane extends JScrollPane
      */
     public boolean getZoom()
     { return canvas.zoom;    }
+    /**
+     *returns a Dimension object containing the width and length of the image
+     *@return Dimension of the image
+     */
+    public Dimension getDimension()
+    {return new Dimension(canvas.width,canvas.height);}
 }
 
 /**
  *the class used by JImagePane to control drawing the image
  */
-class ImageCanvas extends JPanel
+class ImageCanvas extends JPanel implements Runnable
 {
+
     /**
      *the width and height of the image
      */
-    private int width, height;
+    int width, height;
 
     /**
      *indicates if the user wants to zoom image
@@ -99,15 +119,38 @@ class ImageCanvas extends JPanel
     private Image image;
 
     /**
+     *an array for multiple slide show images
+     */
+    private Image[] images;
+
+    /**
+     *the interval between each slide of a slide show
+     */
+    private int interval;
+
+    /**
+     *indicates if the slide show thread is running
+     */
+    private boolean slide_run;
+
+    /**
+     *our slide show thread
+     */
+    private Thread slideshow = new Thread(this);
+
+    /**
      *creates an empty canvas
      */
     public ImageCanvas()
     {
 	super();
+	slide_run = false;
 	zoom = false;
 	center = true;
     }
 
+    //begin overriding size functions for 
+    //scrollpane's adjustments
     public Dimension getMaximumSize()
       { return this.getPreferredSize(); }
     public Dimension getPreferredSize()
@@ -123,26 +166,67 @@ class ImageCanvas extends JPanel
       }
     public Dimension getMinimumSize()
       { return this.getPreferredSize();  }
+    //end overriding size functions for ScrollPane
 
+
+    /**
+     *sets an image.<BR>
+     *@param f image file to load and display
+     *@exception IOException occurs when error reading/loading file
+     */
     public void setImage(File f) throws IOException
     {
+	//stops old thread if startd
+	slideshow.interrupt();
+	images = null;
+	slideshow = new Thread(this); //creates a new fresh thread
+
+	//this.setImage(null,0);
 	//REMOVED - New API in Java 1.4 allows for faster image loading
 	//creates the image using the default toolkit
 	//image = toolkit.createImage(f.getAbsolutePath());
 	//1.4 Image loading: loads a buffered image we cast to a regular image
-	image = (Image) ImageIO.read(f);
+	if(f != null) //make sure we actually have a file
+	    { 
+		image = (Image) ImageIO.read(f);
 
-	//waits until the image is loaded (heigh and width are -1
-	//while the image is still loading)
-	do
-	    {
-		width = image.getWidth(this);
-		height = image.getHeight(this);
+		//waits until the image is loaded (heigh and width are -1
+		//while the image is still loading)
+		do
+		    {
+			width = image.getWidth(this);
+			height = image.getHeight(this);
+		    }
+		while(width == -1 || height == -1);
 	    }
-	while(width == -1 || height == -1);
+	else //image is set to null to display a blank window
+	    { image = null; }
 
 	//refreshes the view with the newly loaded component
         repaint();
+    }
+
+    /**
+     *sets images.<BR>
+     *@param f images file to load and display
+     *@param interval Interval at which to slideshow images if slideshow is enabled
+     *@exception IOException occurs when error reading/loading file
+     */
+    public void setImage(File[] f, int interval) throws IOException
+    {
+	//stop previous slideshow and creates new thread
+	slideshow.interrupt();
+	images = null;
+	slideshow = new Thread(this); //create fresh thread
+
+	this.interval = interval; //set the interval for this slide show
+	images = new Image[f.length]; //create an array of images
+	for(int x = 0; x < images.length; x++) //iterate through files
+	    {
+		images[x] = (Image) ImageIO.read(f[x]); //start reading in files
+		if(slide_run == false) //get the thread running while still reading in more stuff
+		    { slideshow.start(); }
+	    }
     }
 
     public void paint(Graphics g)
@@ -229,6 +313,53 @@ class ImageCanvas extends JPanel
 	    //finally we draw the image
 	    g.drawImage(image,x,y,width,height,this);
 	}
+    }
+
+    //Slideshow thread
+    public void run()
+    {
+	slide_run = true;  //tell the rest of the class thread is running
+	for(int x = 0; true; x++) //iterate through images
+	    {
+		image = images[x % images.length];
+
+		//make sure the next image is loaded to avoid nullpointerexceptions
+		while(image == null)
+		    {
+			try
+			    {
+				Thread.sleep(100);
+			    }
+			//the thread can also die here if the user selectes a differnt image
+			catch(InterruptedException unsleep)
+			    {
+				slide_run = false;
+				break;
+			    }
+		    }
+
+
+		//make sure our image is fully loaded before displaying
+		do
+		    {
+			width = image.getWidth(this);
+			height = image.getHeight(this);
+		    }
+		while(width == -1 || height == -1);
+		
+		//refreshes the view with the newly loaded component
+		repaint();
+
+		//sleep thre threat for the slide show interval
+		try
+		    {Thread.sleep(interval*1000);}
+		catch(InterruptedException unsleep)
+		    {
+			slide_run = false; //tell rest of class thread is dieing
+			break; //let thread die
+		    }
+	    }
+
     }
 }
 

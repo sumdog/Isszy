@@ -8,6 +8,7 @@ package sum.component;
 
 import javax.swing.JScrollPane;
 import java.awt.Container;
+//import javax.swing.JPanel;
 import javax.swing.JButton;
 import java.io.File;
 import java.awt.Dimension;
@@ -84,6 +85,14 @@ public class JDirPanel extends JScrollPane
     }
 
     /**
+     *refreshes the current directory view.<BR>
+     */
+    public void refresh()
+    {
+	c_dirs.refresh();
+    }
+
+    /**
      *sets the listener for this DirPanel.<BR>
      *Only one listener may be set at a time. Adding a second listener
      *will remove the first one.
@@ -129,6 +138,8 @@ class JDir extends Container implements DirSizer, ActionListener
 	super();
 	//set the class variable
 	dir = f;
+	//creates a new layout
+	setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 	//lists all the directories as buttons
 	refresh();
     }
@@ -140,8 +151,9 @@ class JDir extends Container implements DirSizer, ActionListener
      */
     void refresh()
     {
-	//creates a new layout to discard old buttons
-	setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+	//discard old buttons
+	removeAll();
+
 	//an array of files in the current directory
 	File[] temp = dir.listFiles();
         //sort the array using Merge sort
@@ -154,7 +166,9 @@ class JDir extends Container implements DirSizer, ActionListener
 	    {
 		add(new JDirButton(temp[x], this, this));    
 	    }
-	} 
+	}
+	//makes the new buttons appear in the layout
+        validate();
     }
  
     //begin implemented functions

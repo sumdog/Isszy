@@ -1,6 +1,7 @@
 package sum.isszy;
 
 import java.io.File;
+import sum.isszy.dialog.IInitialDialog;
 
 /**
  *the entry point class for the Isszy Image Sorter program.<BR>
@@ -12,7 +13,15 @@ public class Isszy
    
     public static void main(String[]args)
     {
-	IsszyGui main = new IsszyGui(new File("/home"),new File("/home"));
+
+	if(IsszyPrefs.getFirstStart())
+	    { 
+		IInitialDialog start = new IInitialDialog(); 
+		start.setVisible(true);
+	    }
+	
+
+	IsszyGui main = new IsszyGui();
 	main.setSize(640,480);
 	main.setVisible(true);
     }

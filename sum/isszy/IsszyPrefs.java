@@ -113,4 +113,15 @@ public class IsszyPrefs
     
     public static void setYPosition(int x)
     { prefs.putInt("YPOSITION",x); }
+
+    public static void setTrashDirectory(String s) throws IOException
+    { 	if( (new File(s).isDirectory()) )
+	    { prefs.put("TDIR",s); }
+	   else
+	    { throw new IOException("Invalid Directory"); }   
+	}
+	
+	public static String getTrashDirectory()
+	{ return prefs.get("TDIR","./"); }
+
 }

@@ -53,14 +53,15 @@ public class ISettingsDialog extends JDialog implements ActionListener
       private JPanel p_sort = new JPanel();
        private JPanel p_sort1 = new JPanel();
        private JPanel p_sort2 = new JPanel();
+       private JPanel p_sort3 = new JPanel();
         private JTextField tf_sort_sdir = new JTextField(18);
         private JButton b_sort_browse = new JButton(new FolderIcon16());
         private JCheckBox cb_sort_prompt = new JCheckBox();
+        private JTextField tf_sort_trash = new JTextField(18);
+        private JButton b_sort_trash = new JButton(new FolderIcon16());
     private JPanel p_buttons = new JPanel(new FlowLayout());
       private JButton b_ok = new JButton ("OK");
       private JButton b_cancel = new JButton ("Cancel");
-      private JButton b_apply = new JButton ("Apply");
-
 
 
     private void construct()
@@ -74,13 +75,14 @@ public class ISettingsDialog extends JDialog implements ActionListener
 	tf_sort_sdir.setText(IsszyPrefs.getSortDirectory());
 	tf_general_idir.setText(IsszyPrefs.getInitialDirectory());
 	tf_image_time.setText(  new Integer( IsszyPrefs.getSlideTime() ).toString()  );
+    tf_sort_trash.setText(IsszyPrefs.getTrashDirectory());
 
 	//setup action listeners
 	b_general_browse.addActionListener(this);
 	b_sort_browse.addActionListener(this);
 	b_ok.addActionListener(this);
 	b_cancel.addActionListener(this);
-	b_apply.addActionListener(this);
+	b_sort_trash.addActionListener(this);
 
 	//construct General Tab
 	p_general.setLayout(new GridLayout(2,0));
@@ -120,17 +122,23 @@ public class ISettingsDialog extends JDialog implements ActionListener
 	p_image.add(p_image_right);
 
 	//construct Sorting Tab
-	p_sort.setLayout(new GridLayout(2,0));
+	p_sort.setLayout(new GridLayout(3,0));
 	p_sort1.setLayout(new FlowLayout(FlowLayout.CENTER));
 	p_sort2.setLayout(new FlowLayout(FlowLayout.CENTER));
-	p_sort1.add(new JLabel("Sort Directory"));
+	p_sort1.add(new JLabel("Sort Directory   "));
 	p_sort1.add(tf_sort_sdir);
 	p_sort1.add(b_sort_browse);
 	b_sort_browse.setToolTipText("Browse");
 	p_sort2.add(cb_sort_prompt);
 	p_sort2.add(new JLabel("Prompt Before Overwrite"));
+	p_sort3.setLayout(new FlowLayout(FlowLayout.CENTER));
+	p_sort3.add(new JLabel("Trash Directory"));
+	p_sort3.add(tf_sort_trash);
+	p_sort3.add(b_sort_trash);
 	p_sort.add(p_sort1);
+	p_sort.add(p_sort3);
 	p_sort.add(p_sort2);
+	
 
 
 	//put all tabs on table
@@ -141,14 +149,13 @@ public class ISettingsDialog extends JDialog implements ActionListener
 	//construct buttom OK/Cancel area
 	p_buttons.add(b_ok);
 	p_buttons.add(b_cancel);
-	p_buttons.add(b_apply);
 
 	//put everything together
 	getContentPane().add(tablet, BorderLayout.CENTER);
 	getContentPane().add(p_buttons, BorderLayout.SOUTH);
  
 	//some default window stuff
-	setSize(400,170);
+	setSize(450,170);
 	setResizable(false);
 	//center our window
 	Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
@@ -176,8 +183,14 @@ public class ISettingsDialog extends JDialog implements ActionListener
 		if(choose.showOpenDialog(new JFrame()) == JFileChooser.APPROVE_OPTION)
 		    { tf_sort_sdir.setText(choose.getSelectedFile().toString()); }
 	    }
+	else if(e.getSource() == b_sort_trash)
+	{
+		choose.setCurrentDirectory(new File(tf_sort_trash.getText()));
+		if(choose.showOpenDialog(new JFrame()) == JFileChooser.APPROVE_OPTION)
+		    { tf_sort_trash.setText(choose.getSelectedFile().toString()); }		
+	}
 	//take care of our three buttons at the bottom
-	else if(e.getSource() == b_apply || e.getSource() == b_ok)
+	else if(e.getSource() == b_ok)
 	    {
 		try
 		    {
@@ -189,6 +202,7 @@ public class ISettingsDialog extends JDialog implements ActionListener
 			IsszyPrefs.setSaveSettings(cb_general_save.isSelected());
 			IsszyPrefs.setPromptOverwrite(cb_sort_prompt.isSelected());
 			IsszyPrefs.setSlideTime(tf_image_time.getText());
+			IsszyPrefs.setTrashDirectory(tf_sort_trash.getText());
 			if(e.getSource() == b_ok) //the only difference between OK and Apply is Ok closes window
 			    { this.setVisible(false); }
 		    }

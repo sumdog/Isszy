@@ -4,6 +4,7 @@ import sum.component.*;
 import sum.event.*;
 import sum.isszy.dialog.ISettingsDialog;
 import sum.isszy.dialog.IOverwriteDialog;
+import sum.isszy.Isszy;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
@@ -26,7 +27,7 @@ import java.awt.Toolkit;
 public class IsszyGui extends JFrame implements FileListListener, DirPanelListener, ActionListener
 {
     //source and destenation image sleectors
-    private File lister, sorter;
+    private File lister, sorter, trash;
 
     //split pane for left which includes the file list and 2nd split pane
     private JSplitPane sp_left;
@@ -48,7 +49,7 @@ public class IsszyGui extends JFrame implements FileListListener, DirPanelListen
     private JMenuItem mi_about = new JMenuItem("About");
 
     //position/size vars
-    int xcor, ycor, pwidth, pheight; 
+    private int xcor, ycor, pwidth, pheight; 
 
     //storage variables
     protected File[] selectedfiles;
@@ -93,6 +94,7 @@ public class IsszyGui extends JFrame implements FileListListener, DirPanelListen
 	b_mkdir.addActionListener(this);
 	b_trash.addActionListener(this);
 	mi_exit.addActionListener(this);
+	mi_about.addActionListener(this);
 
 	//add everything to Frame
 	getContentPane().setLayout(new BorderLayout());
@@ -180,7 +182,8 @@ public class IsszyGui extends JFrame implements FileListListener, DirPanelListen
 		}
 	    catch(IOException v)
 		{
-		    //insert message box here
+		    //message box
+		    JOptionPane.showMessageDialog(new JFrame(), "Error Loading Image: "+files[0].getName()  ,"Image Load Error",JOptionPane.ERROR_MESSAGE);
 		}
 	}
 	else //more than one file was selected
@@ -191,7 +194,8 @@ public class IsszyGui extends JFrame implements FileListListener, DirPanelListen
 	    }
 	    catch(IOException l)
 	    {
-		//insert message here
+		  //error message
+		  JOptionPane.showMessageDialog(new JFrame(), "Error Loading Selected Images"  ,"Image Load Error",JOptionPane.ERROR_MESSAGE);
 	    }
 
 	}
@@ -253,14 +257,29 @@ public class IsszyGui extends JFrame implements FileListListener, DirPanelListen
 			    { dp_dirlist.refresh(); }
 		    }
 	    }
-	else if(e.getSource() == b_trash)
+	else if(e.getSource() == b_trash) //send file(s) to trash
 	    {
+	    	for(int x=0; x<selectedfiles.length; x++)
+	    	{
+	    		if(!  selectedfiles[x].renameTo(new File(trash,selectedfiles[x].getName())) )
+	    		{ JOptionPane.showMessageDialog(new JFrame(),"Could not move: "+selectedfiles[x].getName()+" to trash.","Error Trashing File",JOptionPane.WARNING_MESSAGE); }
+	        }
+    		sfl_list.refreshFiles(); //refresh list to show files moved to trash
 	    }
 	else if(e.getSource() == mi_exit)
 	    {
 	    	//run our windowClosing() function in the window adapter
 	    	this.dispatchEvent(new WindowEvent(this,WindowEvent.WINDOW_CLOSING));
 	    }
+	else if(e.getSource() == mi_about)
+		{
+			//displays about dialogue
+			JOptionPane.showMessageDialog(new JFrame(),"Isszy "+Isszy.VERSION+"\n"+
+			  "Isszy is a simple Image Sorter\n"+
+			  "Licensed under the GPL\n"+
+			  "Copyright 2002 Sumit Khanna\n<skhanna@csc.tntech.edu>"
+			  ,"Isszy",JOptionPane.PLAIN_MESSAGE);
+		}
     }
 
     private void readPrefs()
@@ -274,6 +293,7 @@ public class IsszyGui extends JFrame implements FileListListener, DirPanelListen
 	image.setCenter(IsszyPrefs.getCenterImage());
 	lister = new File(IsszyPrefs.getInitialDirectory());
 	sorter = new File(IsszyPrefs.getSortDirectory());
+	trash = new File(IsszyPrefs.getTrashDirectory());
 	if(sfl_list != null || dp_dirlist != null)
 	    {
 		sfl_list.setDir(lister);

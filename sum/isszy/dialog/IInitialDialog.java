@@ -34,6 +34,9 @@ public class IInitialDialog extends JDialog implements ActionListener
 
     private JPanel p_from = new JPanel();
     private JPanel p_to = new JPanel();
+    private JPanel p_trash = new JPanel();
+    private JButton b_trash = new JButton(new FolderIcon16());
+    private JTextField tf_trash = new JTextField(20);
     private JPanel p_buttons = new JPanel();
     private JTextField tf_from = new JTextField(20);
     private JTextField tf_to = new JTextField(20);
@@ -44,15 +47,16 @@ public class IInitialDialog extends JDialog implements ActionListener
 
     private void construct()
     {
-	this.setSize(420,140); //set size of our window
+	this.setSize(420,160); //set size of our window
 	//center our window
 	Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
-	this.setLocation( (int) ((size.getWidth()-420)/2), (int) ((size.getHeight() - 140)/2));
+	this.setLocation( (int) ((size.getWidth()-420)/2), (int) ((size.getHeight() - 160)/2));
 
 	//set layout for our three major panels
 	p_from.setLayout(new FlowLayout(FlowLayout.LEFT));
 	p_to.setLayout(new FlowLayout(FlowLayout.LEFT));
 	p_buttons.setLayout(new FlowLayout(FlowLayout.CENTER));
+	p_trash.setLayout(new FlowLayout(FlowLayout.LEFT));
 
 	//construct the From panel
 	p_from.add(new JLabel("Images to Sort"));
@@ -65,19 +69,26 @@ public class IInitialDialog extends JDialog implements ActionListener
 	p_to.add(tf_to);
 	p_to.add(b_to);
 	b_to.setToolTipText("Browse");
+	
+	//construct the trash pannel
+	p_trash.add(new JLabel("Trash              "));
+	p_trash.add(tf_trash);
+	p_trash.add(b_trash);
 
 	//the bottom main buttons
 	p_buttons.add(b_ok);
 	p_buttons.add(b_exit);
 	
 	//slap it all together
-	this.getContentPane().setLayout(new GridLayout(3,0));
+	this.getContentPane().setLayout(new GridLayout(4,0));
 	this.getContentPane().add(p_from);
 	this.getContentPane().add(p_to);
+	this.getContentPane().add(p_trash);
 	this.getContentPane().add(p_buttons);
 	this.getContentPane().setVisible(true);
 
 	//some action listeners
+	b_trash.addActionListener(this);
 	b_to.addActionListener(this);
 	b_from.addActionListener(this);
 	b_ok.addActionListener(this);
@@ -113,6 +124,12 @@ public class IInitialDialog extends JDialog implements ActionListener
 		if(choose.showOpenDialog(new JFrame()) == JFileChooser.APPROVE_OPTION)
 		    { tf_from.setText(choose.getSelectedFile().toString()); }
 	    }
+	else if(e.getSource() == b_trash)
+	    {
+	   	   choose.setCurrentDirectory(new File(tf_trash.getText()));
+	   	   if(choose.showOpenDialog(new JFrame()) == JFileChooser.APPROVE_OPTION)
+	   	     { tf_trash.setText(choose.getSelectedFile().toString()); }
+	    }
 	else if(e.getSource() == b_exit)
 	    {
 		IsszyPrefs.setFirstStart(true);
@@ -122,6 +139,7 @@ public class IInitialDialog extends JDialog implements ActionListener
 	    {
 		try
 		{
+			IsszyPrefs.setTrashDirectory(tf_trash.getText());
 		    IsszyPrefs.setInitialDirectory(tf_from.getText());
 		    IsszyPrefs.setSortDirectory(tf_to.getText());
 		    IsszyPrefs.setFirstStart(false);

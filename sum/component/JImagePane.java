@@ -342,8 +342,8 @@ class ImageCanvas extends JPanel implements Runnable
 		//make sure our image is fully loaded before displaying
 		do
 		    {
-			width = image.getWidth(this);
-			height = image.getHeight(this);
+			width =  image.getWidth(this) ;
+			height = image.getHeight(this) ;
 		    }
 		while(width == -1 || height == -1);
 		

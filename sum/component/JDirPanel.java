@@ -8,7 +8,6 @@ package sum.component;
 
 import javax.swing.JScrollPane;
 import java.awt.Container;
-//import javax.swing.JPanel;
 import javax.swing.JButton;
 import java.io.File;
 import java.awt.Dimension;
@@ -18,6 +17,15 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.util.Arrays;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseEvent;
+import javax.swing.JPopupMenu;
+import java.util.Vector;
+import java.util.Collections;
+import javax.swing.JMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JOptionPane;
+import javax.swing.JFrame;
 
 import sum.event.DirPanelListener;
 
@@ -111,7 +119,7 @@ public class JDirPanel extends JScrollPane
 
 }
 
-class JDir extends Container implements DirSizer, ActionListener
+class JDir extends Container implements DirSizer, ActionListener, MouseListener, DirectoryPopupListener
 {
     /**
      *the file objects denoting the directory to scan.
@@ -164,13 +172,13 @@ class JDir extends Container implements DirSizer, ActionListener
 	{
 	    if(temp[x].isDirectory())
 	    {
-		add(new JDirButton(temp[x], this, this));    
+		add(new JDirButton(temp[x], this, this, this));    
 	    }
 	}
 	//makes the new buttons appear in the layout
         validate();
     }
- 
+
     //begin implemented functions
     public void setDSize(int width)
     {
@@ -181,6 +189,7 @@ class JDir extends Container implements DirSizer, ActionListener
     public int getDSize()
     { return width;  }
 
+    //action listener
     public void actionPerformed(ActionEvent e)
     {
 	if(listener != null)
@@ -188,6 +197,39 @@ class JDir extends Container implements DirSizer, ActionListener
 	    listener.directorySelected(( (JDirButton) e.getSource() ).getFile());
 	}
     }
+    //mouse listener
+    public void mouseClicked(MouseEvent e)
+    {}
+    public void mouseEntered(MouseEvent e)
+    {}
+    public void mouseExited(MouseEvent e)
+    {}
+    public void mousePressed(MouseEvent e)
+    {
+	//detect right click for popup menu
+	if(e.isPopupTrigger())
+	{
+	    //retrueves a new JMenu from the DirectoryPopup class (inner class down below) and converts
+	    //it to a popup menu and then displays it where the mouse was clicked in the panel
+	    (new DirectoryPopup( ((JDirButton)e.getSource()).getFile() ,this )).getPopupMenu().show( (Container) e.getSource(),e.getX(),e.getY());
+	}
+    }
+    public void mouseReleased(MouseEvent e)
+    {
+	//on some platforms the popup is tirggired when 
+	//the mouse is released, on others when pressed
+	//so we'll call the other funcion from here
+	mousePressed(e);
+    }
+    //end mouse listener
+
+    //being directory popup listener
+    public void DirectorySelected(File f)
+    {
+	if(listener != null)
+	    { listener.directorySelected(f); }
+    }
+    //end directory popup listener
 
 }
 
@@ -212,13 +254,15 @@ class JDirButton extends JButton
      *@param a the file which will determine the name of the button.
      *@param s the dirsizer object which determines the size of the button.
      *@param l action listener for the button
+     *@param m mouse listener for the button
      */
-    public JDirButton(File a, DirSizer s, ActionListener l)
+    public JDirButton(File a, DirSizer s, ActionListener l, MouseListener m)
     { 
 	super(a.getName()); 
         file = a;
         size = s;
         addActionListener(l);
+	addMouseListener(m);
 	size.setDSize(super.getPreferredSize().width);
     }
 
@@ -226,7 +270,7 @@ class JDirButton extends JButton
      *gets the File object represented by button.<BR>
      *@return the file object used to construct this button.
      */
-    File getFile()
+    public File getFile()
     {return file;}
 
     //overridden functions
@@ -258,4 +302,120 @@ interface DirSizer
      *@return the width the container perfers the component to be.
      */
     public int getDSize();
+}
+
+/**
+ *class for directoy list popups seen when user makes a "popup" click (tyically the 
+ *right mouse button) in the DirPanel
+ */
+class DirectoryPopup extends JMenu implements ActionListener
+{
+
+    /**
+     *file object which menu represents.<br>
+     */
+    private File file;
+
+    /**
+     *listener object for communication.<br>
+     */
+    private DirectoryPopupListener listener;
+
+    /**
+     *menu item labled "Sort Image"
+     */
+    private JMenuItem mi_sort = new JMenuItem("Sort Image");
+
+    /**
+     *menu item labled "New Folder"
+     */
+    private JMenuItem mi_mkdir = new JMenuItem("New Folder");
+
+    /**
+     *internal constructor for popup menu.<BR>
+     *@param file directory to list.
+     *@param l DirectoryPopupListener used for communication
+     */
+    public DirectoryPopup(File file,  DirectoryPopupListener l)
+    {
+	super(file.getName(),true);
+	//setup file and listener variable for later
+	this.file = file;
+	this.listener = l;
+
+	//an array of files in the current directory
+	File[] temp = file.listFiles();
+	//a Vector to store directories later
+	Vector dirs = new Vector();
+	//loop though each file and see if it is a directory
+	for(int count = 0 ; count < temp.length ; count++)
+	{
+	    if(temp[count].isDirectory())
+	    { dirs.addElement(temp[count]); }
+	}
+        //sort the dirs using Merge sort
+	Collections.sort(dirs);
+
+	//adds top two menu itmes and seperator
+	this.add(mi_sort);
+	this.add(mi_mkdir);
+	this.addSeparator();
+
+	//adds listeners
+	mi_sort.addActionListener(this);
+	mi_mkdir.addActionListener(this);
+
+	for(int count=0; count < dirs.size() ; count++)
+	{
+	    this.add( ( new DirectoryPopup( ((File) dirs.elementAt(count)) ,  l ) ));
+	}
+
+    }
+
+
+    /**
+     *returns the file the menu object represents.<br>
+     *@return file object menu represents
+     */
+    private File getFile()
+    { return file; }
+
+    //begin Implemented ActionListener
+    public void actionPerformed(ActionEvent e)
+    {
+	if(e.getSource() == mi_sort && listener != null)
+	    { listener.DirectorySelected(file); }
+	else if(e.getSource() == mi_mkdir)
+	    {
+		String newdir = JOptionPane.showInputDialog(new JFrame(),"Enter a Directory Name","New Directory",JOptionPane.QUESTION_MESSAGE);
+		if (newdir != null)
+		    {
+			if( (new File(file.toString(),newdir)).mkdirs() == false)
+			    { JOptionPane.showMessageDialog(new JFrame(),"Unable to Create Directory","Error",JOptionPane.ERROR_MESSAGE); }
+			else
+			    {
+				if(JOptionPane.showConfirmDialog(new JFrame(),"Would you like to move the currently selected files to this new directory?","Move Files",JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+				    {
+					if(listener != null)
+					    {
+						listener.DirectorySelected(new File(file.toString(),newdir));
+					    }
+				    }
+			    }
+		    }
+	    }
+    }
+
+}
+
+/**
+ *used for interaction between the JDirList and recursive construction of menu objects.
+ */
+interface DirectoryPopupListener
+{
+    /**
+     *called when the user selects a directory to sort the image to.<BR>
+     *@param f directory to sort image to.
+     */
+    public void DirectorySelected(File f);
 }

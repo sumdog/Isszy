@@ -1,0 +1,24 @@
+<project name="Isszy" default="dist" basedir=".">
+
+  <!--globals-->
+  <property name="src" value="." />
+  <property name="build" value="./build" />
+  
+
+  <!--create build directory-->
+  <target name="init">
+    <tstamp/>
+    <mkdir dir="${build}" />
+  </target>
+
+  <!--compile all source files-->
+  <target name="compile" depends="init">
+    <javac srcdir="${src}" destdir="${build}"/>
+  </target>
+
+  <!--clean up compiled class files-->
+  <target name="clean">
+    <delete dir="${build}" />
+  </target>
+
+</project>

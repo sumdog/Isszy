@@ -3,10 +3,12 @@ package sum.component;
 import javax.swing.JScrollPane;
 import javax.swing.JPanel;
 import java.io.File;
+import java.io.IOException;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.Graphics;
+import javax.imageio.ImageIO;
 
 /**
  *This class provides a swing component which will display an image.<BR>
@@ -130,8 +132,11 @@ class ImageCanvas extends JPanel
 
     public void setImage(File f)
     {
+	//REMOVED - New API in Java 1.4 allows for faster image loading
 	//creates the image using the default toolkit
-	image = toolkit.createImage(f.getAbsolutePath());
+	//image = toolkit.createImage(f.getAbsolutePath());
+	//1.4 Image loading: loads a buffered image we cast to a regular image
+	try{image = (Image) ImageIO.read(f);}catch(IOException i){}
 
 	//waits until the image is loaded (heigh and width are -1
 	//while the image is still loading)

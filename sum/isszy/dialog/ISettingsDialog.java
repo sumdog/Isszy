@@ -10,5 +10,11 @@ public class ISettingsDialog extends JDialog
     public ISettingsDialog()
     {
 	super(new Frame(),"Isszy Preferences");
+	construct();
+    }
+
+    private void construct()
+    {
+
     }
 }

@@ -36,11 +36,10 @@ public class JImagePane extends JScrollPane
 
     /**
      *sets an Image for the panel.<br>
-     *The image must be a supported by the JVM's default toolkit (e.g. 
-     *a jpeg, gif or png as of JDK 1.3).
      *@param f file object containing the abstract pathname for the image
+     *@exception thrown if there was a problem processing the image
      */
-    public void setImage(File f)
+    public void setImage(File f) throws IOException
     {
         canvas.setImage(f);
 	setViewportView(canvas);
@@ -100,11 +99,6 @@ class ImageCanvas extends JPanel
     private Image image;
 
     /**
-     *set to the default toolkit for this operating system
-     */
-    private Toolkit toolkit = Toolkit.getDefaultToolkit();
-
-    /**
      *creates an empty canvas
      */
     public ImageCanvas()
@@ -130,13 +124,13 @@ class ImageCanvas extends JPanel
     public Dimension getMinimumSize()
       { return this.getPreferredSize();  }
 
-    public void setImage(File f)
+    public void setImage(File f) throws IOException
     {
 	//REMOVED - New API in Java 1.4 allows for faster image loading
 	//creates the image using the default toolkit
 	//image = toolkit.createImage(f.getAbsolutePath());
 	//1.4 Image loading: loads a buffered image we cast to a regular image
-	try{image = (Image) ImageIO.read(f);}catch(IOException i){}
+	image = (Image) ImageIO.read(f);
 
 	//waits until the image is loaded (heigh and width are -1
 	//while the image is still loading)

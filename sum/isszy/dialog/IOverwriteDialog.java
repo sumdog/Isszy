@@ -6,7 +6,6 @@ import javax.swing.JButton;
 import javax.swing.SwingConstants;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
-import javax.swing.JButton;
 import java.awt.GridLayout;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -14,11 +13,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
-//import javax.swing.JOptionPane;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import sum.component.JImagePane;
-import java.awt.Dimension;
+
 
 public class IOverwriteDialog extends JDialog implements ActionListener
 {

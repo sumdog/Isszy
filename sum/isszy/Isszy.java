@@ -1,6 +1,5 @@
 package sum.isszy;
 
-import java.io.File;
 import sum.isszy.dialog.IInitialDialog;
 
 /**

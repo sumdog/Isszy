@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.awt.Dimension;
 import java.awt.Image;
-import java.awt.Toolkit;
 import java.awt.Graphics;
 import javax.imageio.ImageIO;
 

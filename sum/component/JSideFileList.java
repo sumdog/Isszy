@@ -25,7 +25,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
 import java.util.Vector;
 import java.util.Collections;
 

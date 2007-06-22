@@ -1,4 +1,4 @@
-<project name="Isszy" default="dist" basedir=".">
+<project name="Isszy" default="jar" basedir=".">
 
   <!--globals-->
   <property name="src" value="." />

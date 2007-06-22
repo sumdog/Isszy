@@ -13,12 +13,15 @@ import javax.swing.JComboBox;
 import javax.swing.JSplitPane;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
+
+import java.awt.AWTEvent;
 import java.awt.Container;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.event.ListSelectionListener;
@@ -58,276 +61,291 @@ public class JSideFileList extends JComponent implements FileFilter, ActionListe
     //keeps track of list position between refreshes
     private int position_sensor;
 
-  /**
-    *constructs a file list set to the current directory.
-    */
-  public JSideFileList()
-  {
-    //this complicated looking thing is a little hack to get the default
-    //directory's abstract pathname without haveing to deail with the trailing "."
-    current = (new File(".")).getAbsoluteFile().getParentFile();
-    construct();
-  }
-
-  /**
-    *constructs a file list set to the directory denoted by the file object.<br>
-    *@param f Directory from which to construct the list view.
-    */
-  public JSideFileList(File f)
-  {
-    current = f;
-    construct();
-  }
-
-  /**
-    *constructs a file list set to the directory denoted by the abstract path name.<br>
-    *@param s Abstract pathname of directory
-    */
-  public JSideFileList(String s)
-  {
-    current = new File(s);
-    construct();
-  }
-
     /**
-     *sets the current directory.
-     *@param f current directory to set.
-     */
-    public void setDir(File f)
-    {
-	current = f;
-	scanDir(f);
-    }
+	 *constructs a file list set to the current directory.
+	 */
+	public JSideFileList() {
+		//this complicated looking thing is a little hack to get the default
+		//directory's abstract pathname without haveing to deail with the trailing "."
+		current = (new File(".")).getAbsoluteFile().getParentFile();
+		construct();
+	}
 
-  /**
-   *refreshes the current list of files after a file has been moved.<BR>
-   */
-  public void refreshFiles()
-  { 
-      scanDir(current);
-      if(vfiles.size() == 0)
-	  { dispatchDirEmptyEvent(); }
-      else if(position_sensor >= vfiles.size())
-	  { 
-	      jl_files.setSelectedIndex( jl_files.getLastVisibleIndex() ); 
-	  }
-      else
-	  { 
-	      jl_files.setSelectedIndex( position_sensor ); 
-	  }
-      jsp_split.repaint();
-  }
+	/**
+	 *constructs a file list set to the directory denoted by the file object.<br>
+	 *@param f Directory from which to construct the list view.
+	 */
+	public JSideFileList(File f) {
+		current = f;
+		construct();
+	}
 
-  /**
-    *aranges the components and layouts.<BR>
-    *This functions is called after the constructors are finished
-    *setting instance variables.
-    */
-  private void construct()
-   {
-       //sets the primary layout of the component
-       setLayout(new BorderLayout());
+	/**
+	 *constructs a file list set to the directory denoted by the abstract path name.<br>
+	 *@param s Abstract pathname of directory
+	 */
+	public JSideFileList(String s) {
+		current = new File(s);
+		construct();
+	}
 
-         //the top container for the directory controls
-         con_top.setLayout(gbl_controls);
+	/**
+	 *sets the current directory.
+	 *@param f current directory to set.
+	 */
+	public void setDir(File f) {
+		current = f;
+		scanDir(f);
+	}
 
-           //the first row of components in con_top
-           gbc.weightx = 1.0;
-           gbc.fill = GridBagConstraints.HORIZONTAL; //get them to fill horizontally
-           gbl_controls.setConstraints(b_parent, gbc); //add constraints to button
-           con_top.add(b_parent); //add button to layout
+	/**
+	 *refreshes the current list of files after a file has been moved.<BR>
+	 */
+	public void refreshFiles() {
+		scanDir(current);
+		if (vfiles.size() == 0) {
+			dispatchDirEmptyEvent();
+		} else if (position_sensor >= vfiles.size()) {
+			jl_files.setSelectedIndex(jl_files.getLastVisibleIndex());
+		} else {
+			jl_files.setSelectedIndex(position_sensor);
+		}
+		jsp_split.repaint();
+	}
 
-           //last item of row one (REMAINDER)
-           gbc.gridwidth = GridBagConstraints.REMAINDER;
-           gbl_controls.setConstraints(b_refresh, gbc);
-           con_top.add(b_refresh);
+	/**
+	 *aranges the components and layouts.<BR>
+	 *This functions is called after the constructors are finished
+	 *setting instance variables.
+	 */
+	private void construct() {
+		//sets the primary layout of the component
+		setLayout(new BorderLayout());
 
-           //drop down box on next row for mount points
-           gbl_controls.setConstraints(jcb_mounts, gbc);
-           con_top.add(jcb_mounts);
+		//the top container for the directory controls
+		con_top.setLayout(gbl_controls);
 
-	   //sizes the divider to 30% dirs, 70% file list
-	   jsp_split.setDividerLocation((double) .50);
+		//the first row of components in con_top
+		gbc.weightx = 1.0;
+		gbc.fill = GridBagConstraints.HORIZONTAL; //get them to fill horizontally
+		gbl_controls.setConstraints(b_parent, gbc); //add constraints to button
+		con_top.add(b_parent); //add button to layout
 
-           //add listeners
-           jl_dirs.addMouseListener(this);
-           jl_files.addListSelectionListener(this);
-           b_parent.addActionListener(this);
-           b_refresh.addActionListener(this);
-           jcb_mounts.addActionListener(this);
+		//last item of row one (REMAINDER)
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		gbl_controls.setConstraints(b_refresh, gbc);
+		con_top.add(b_refresh);
 
-       //adds the top piece to the component
-       add(con_top, BorderLayout.NORTH);
-       //adds the Dirs/File list views to center
-       add(jsp_split, BorderLayout.CENTER);
+		//drop down box on next row for mount points
+		gbl_controls.setConstraints(jcb_mounts, gbc);
+		con_top.add(jcb_mounts);
 
-       //initial file scan
-       scanDir(current);
-   }
+		//sizes the divider to 30% dirs, 70% file list
+		jsp_split.setDividerLocation((double) .50);
 
-   /**
-     *scans a new dir and displays it in the list boxes.
-     */
-   private void scanDir(File f)
-   {
-      //clears the two vectors
-      vdirs.clear();
-      vfiles.clear();
+		//add listeners
+		jl_dirs.addMouseListener(this);
+		jl_files.addListSelectionListener(this);
+		b_parent.addActionListener(this);
+		b_refresh.addActionListener(this);
+		jcb_mounts.addActionListener(this);
 
-      //dumps all files at location to temp array after being filtered
-      //the filter also adds the files to the vector
-      File[] ftemp = f.listFiles(this);
+		//adds the top piece to the component
+		add(con_top, BorderLayout.NORTH);
+		//adds the Dirs/File list views to center
+		add(jsp_split, BorderLayout.CENTER);
 
-      //sort the two vectors
-      Collections.sort(vdirs);
-      Collections.sort(vfiles);
+		//initial file scan
+		scanDir(current);
+	}
 
-      //check to see if we have a parent and set the button accordingly
-      if(current.getParent() == null)
-        { b_parent.setEnabled(false); }
-      else
-        { b_parent.setEnabled(true); }
+	/**
+	 *scans a new dir and displays it in the list boxes.
+	 */
+	private void scanDir(File f) {
+		//clears the two vectors
+		vdirs.clear();
+		vfiles.clear();
 
-       //sets the list data elements for JList boxes
-       jl_dirs.setListData(vdirs);
-       jl_files.setListData(vfiles);
+		//dumps all files at location to temp array after being filtered
+		//the filter also adds the files to the vector
+		File[] ftemp = f.listFiles(this);
 
+		//sort the two vectors
+		Collections.sort(vdirs);
+		Collections.sort(vfiles);
 
-   }//end scanDir
+		//check to see if we have a parent and set the button accordingly
+		if (current.getParent() == null) {
+			b_parent.setEnabled(false);
+		} else {
+			b_parent.setEnabled(true);
+		}
 
-   /**
-     *adds a FileListListener.<BR>
-     *Please do not try and add more than one listener. If you try
-     *to add a second listener, it will overwrite the first.
-     *@param l FileListListener to recieve file and dir selection events
-     */
-   public void addFileListListener(FileListListener l)
-    {  listener = l; }
+		//sets the list data elements for JList boxes
+		jl_dirs.setListData(vdirs);
+		jl_files.setListData(vfiles);
 
-    //implementation of FileFilter
-   public boolean accept(File f)
-   {
-     if( f.isDirectory() )
-     {
-       vdirs.add(f.getName());
-       return true;
-     }
-     else
-     {
-        String temp = f.toString().toLowerCase();
-        if(temp.endsWith("jpg") || temp.endsWith("gif") || temp.endsWith("png"))
-        {
-          vfiles.add(f.getName());
-          return true;
-        }
-     }
+	}//end scanDir
 
-        return false;
-   }//end accept()
+	/*
+	 * moves up JList by one.<br>
+	 * Useful for passing navigation with up key
+	 */
+	public void moveFileListUp() {
+		int i = jl_files.getSelectedIndex();
+		if(i > 0) {
+			jl_files.setSelectedIndex(i -1);
+		}
+	}
+	
+	/*
+	 * moves down JList by one.<br>
+	 * Useful for passing navigation with down key
+	 */	
+	public void moveFileListDown() {
+		int[] i = jl_files.getSelectedIndices();
+		if( i.length != 0 && i[i.length-1] < vfiles.size()-1) {
+			jl_files.setSelectedIndex(i[i.length-1] + 1);
+		}
+		
+	}
+	
+	/**
+	 *adds a FileListListener.<BR>
+	 *Please do not try and add more than one listener. If you try
+	 *to add a second listener, it will overwrite the first.
+	 *@param l FileListListener to recieve file and dir selection events
+	 */
+	public void addFileListListener(FileListListener l) {
+		listener = l;
+	}
 
-//begin mouse listener interface
-   public void mouseClicked(MouseEvent e)
-   {
-       //change the directory and rescan
-       if(e.getSource() == jl_dirs && jl_dirs.getSelectedValue() != null )
-       {
-          current = new File(current, (String) jl_dirs.getSelectedValue()) ;
-          scanDir(current);
-          dispatchDirEvent(current);
-          jsp_split.repaint();
-       }
+	//implementation of FileFilter
+	public boolean accept(File f) {
+		if (f.isDirectory()) {
+			vdirs.add(f.getName());
+			return true;
+		} else {
+			String temp = f.toString().toLowerCase();
+			if (temp.endsWith("jpg") || temp.endsWith("gif")
+					|| temp.endsWith("png")) {
+				vfiles.add(f.getName());
+				return true;
+			}
+		}
 
-   }
-   public void mouseExited(MouseEvent e)
-   {}
-   public void mouseEntered(MouseEvent e)
-   {}
-   public void mousePressed(MouseEvent e)
-   {}
-   public void mouseReleased(MouseEvent e)
-   {
-   }
-//end mouse listener interface
+		return false;
+	}//end accept()
 
+	//begin mouse listener interface
+	public void mouseClicked(MouseEvent e) {
+		//change the directory and rescan
+		if (e.getSource() == jl_dirs && jl_dirs.getSelectedValue() != null) {
+			current = new File(current, (String) jl_dirs.getSelectedValue());
+			scanDir(current);
+			dispatchDirEvent(current);
+			jsp_split.repaint();
+		}
 
-//begin ListSelectionListener interface
-   public void valueChanged(ListSelectionEvent e)
-   {
-       if(e.getSource() == jl_files && (e.getValueIsAdjusting() ==false))
-       {
-           Object[] temps = jl_files.getSelectedValues();
-	   File[] tempf = new File[temps.length];
-           for(int j=0; j < temps.length; j++)
-	   {
-	       tempf[j] = new File(current, (String) temps[j]);
-	   }
-	   if( ( (JList) e.getSource()).getSelectedIndex() != -1)
-	       { position_sensor = ((JList) e.getSource()).getSelectedIndex(); }
-	   dispatchFileEvent(tempf);
-       }
-   }
-//end list listener interface
-//begin action listener interface
-   public void actionPerformed(ActionEvent e)
-   {
-       //mount point is changed and different than current
-       if(e.getSource() == jcb_mounts && current.toString().startsWith( ((JComboBox) e.getSource()).getSelectedItem().toString() ) == false)
-       {
-           dispatchMountEvent(  ((JComboBox) e.getSource()).getSelectedItem().toString()   );
-           current = new File( ((JComboBox) e.getSource()).getSelectedItem().toString()   );
-           scanDir(current);
-           jsp_split.repaint();
-       }
-       //refresh button
-       else if(e.getSource() == b_refresh)
-       {
-          scanDir(current);
-          jsp_split.repaint();
-       }
-       //parent directory button
-       else if(e.getSource() == b_parent)
-       {
-          current = current.getParentFile();
-          scanDir(current);
-          jl_dirs.clearSelection();
-          jl_files.clearSelection();
-          jsp_split.repaint();
-       }
-   }
-//end action listener interface
+	}
 
-   /**
-    *dispatches an event when a file has been selected.
-    *@param f File that has been selected
-    */
-   protected void dispatchFileEvent(File[] f)
-   {
-      if(listener != null)
-      { listener.filesSelected(f); }
-   }
-   /**
-     *dispatches an event when a directory has been selected.
-     *@param d Directory that has been selected
-     */
-   protected void dispatchDirEvent(File d)
-   {
-      if(listener != null)
-      { listener.dirSelected(d); }
-   }
-   /**
-     *dispatches an event when a mount point has been changed
-     *@param s String representation of mount point
-     */
-   protected void dispatchMountEvent(String s)
-   {
-      if(listener != null)
-      { listener.mountSelected(s); }
-   }
-    protected void dispatchDirEmptyEvent()
-    {
-	if(listener != null)
-	    { listener.dirEmpty(); }
-    }
+	public void mouseExited(MouseEvent e) {
+	}
+
+	public void mouseEntered(MouseEvent e) {
+	}
+
+	public void mousePressed(MouseEvent e) {
+	}
+
+	public void mouseReleased(MouseEvent e) {
+	}
+
+	//end mouse listener interface
+
+	//begin ListSelectionListener interface
+	public void valueChanged(ListSelectionEvent e) {
+		if (e.getSource() == jl_files && (e.getValueIsAdjusting() == false)) {
+			Object[] temps = jl_files.getSelectedValues();
+			File[] tempf = new File[temps.length];
+			for (int j = 0; j < temps.length; j++) {
+				tempf[j] = new File(current, (String) temps[j]);
+			}
+			if (((JList) e.getSource()).getSelectedIndex() != -1) {
+				position_sensor = ((JList) e.getSource()).getSelectedIndex();
+			}
+			dispatchFileEvent(tempf);
+		}
+	}
+
+	//end list listener interface
+	//begin action listener interface
+	public void actionPerformed(ActionEvent e) {
+		//mount point is changed and different than current
+		if (e.getSource() == jcb_mounts
+				&& current.toString().startsWith(
+						((JComboBox) e.getSource()).getSelectedItem()
+								.toString()) == false) {
+			dispatchMountEvent(((JComboBox) e.getSource()).getSelectedItem()
+					.toString());
+			current = new File(((JComboBox) e.getSource()).getSelectedItem()
+					.toString());
+			scanDir(current);
+			jsp_split.repaint();
+		}
+		//refresh button
+		else if (e.getSource() == b_refresh) {
+			scanDir(current);
+			jsp_split.repaint();
+		}
+		//parent directory button
+		else if (e.getSource() == b_parent) {
+			current = current.getParentFile();
+			scanDir(current);
+			jl_dirs.clearSelection();
+			jl_files.clearSelection();
+			jsp_split.repaint();
+		}
+	}
+
+	//end action listener interface
+
+	/**
+	 *dispatches an event when a file has been selected.
+	 *@param f File that has been selected
+	 */
+	protected void dispatchFileEvent(File[] f) {
+		if (listener != null) {
+			listener.filesSelected(f);
+		}
+	}
+
+	/**
+	 *dispatches an event when a directory has been selected.
+	 *@param d Directory that has been selected
+	 */
+	protected void dispatchDirEvent(File d) {
+		if (listener != null) {
+			listener.dirSelected(d);
+		}
+	}
+
+	/**
+	 *dispatches an event when a mount point has been changed
+	 *@param s String representation of mount point
+	 */
+	protected void dispatchMountEvent(String s) {
+		if (listener != null) {
+			listener.mountSelected(s);
+		}
+	}
+
+	protected void dispatchDirEmptyEvent() {
+		if (listener != null) {
+			listener.dirEmpty();
+		}
+	}
 
 }//end class
 

@@ -142,9 +142,9 @@ public class IsszyGui extends JFrame implements FileListListener, DirPanelListen
 					IsszyPrefs.setWidth(e.getWindow().getWidth());
 					IsszyPrefs.setXPosition(e.getWindow().getLocation().x);
 					IsszyPrefs.setYPosition(e.getWindow().getLocation().y);
-					//exit program
-					System.exit(0);
 				}
+				//exit program
+				System.exit(0);
 			}//end windowClosing()
 		}//end anonymous innerclass
 				);//end addWindowListner()
@@ -295,7 +295,8 @@ public class IsszyGui extends JFrame implements FileListListener, DirPanelListen
 			JOptionPane.showMessageDialog(new JFrame(), "Isszy "
 					+ Isszy.VERSION + "\n" + "Isszy is a simple Image Sorter\n"
 					+ "Licensed under the GPL\n"
-					+ "Copyright 2002,2007 Sumit Khanna\n<sumdog@gmail.com>",
+					+ "Copyright 2002,2007 Sumit Khanna\n<sumdog@gmail.com>\n" 
+					+ "http://penguindreams.org",
 					"Isszy", JOptionPane.PLAIN_MESSAGE);
 		}
 	}

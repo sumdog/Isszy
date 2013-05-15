@@ -14,7 +14,7 @@
 
   <!--compile all source files-->
   <target name="compile" depends="init">
-    <javac srcdir="${src}" destdir="${build}" debug="off" optimize="on"/>
+    <javac srcdir="${src}" destdir="${build}" debug="off" optimize="on" target="1.6" source="1.6" />
   </target>
 
   <!--compile all souce files with debugging support-->
@@ -31,6 +31,10 @@
 
   <target name="jar" depends="compile">
     <jar destfile="./Isszy.jar" basedir="${build}" manifest="./manifest.txt" />
+  </target>
+
+  <target name="mac" depends="jar">
+    
   </target>
 
   <target name="doc" depends="init">

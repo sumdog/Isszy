@@ -103,7 +103,8 @@ public class IsszyGui extends JFrame implements FileListListener, DirPanelListen
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(sp_left, BorderLayout.CENTER);
 		getContentPane().add(east, BorderLayout.EAST);
-		getContentPane().add(menu, BorderLayout.NORTH);
+		//getContentPane().add(menu, BorderLayout.NORTH);
+		setJMenuBar(menu);
 
 		//set our size
 		this.setSize(pwidth, pheight);
